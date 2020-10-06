@@ -8,7 +8,7 @@ object DataCompression {
           if (chars.tail.isEmpty) returnString + chars.head else {
             if (chars.head == chars.tail.head) recurse(chars.tail, tally + 1, returnString) else {
               if (tally == 1) recurse(chars.tail, tally, returnString + chars.head) else {
-                recurse(chars.tail, 0, returnString + tally.toString + chars.head)
+                recurse(chars.tail, 1, returnString + tally.toString + chars.head)
               }
             }
           }

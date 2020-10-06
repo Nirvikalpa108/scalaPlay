@@ -1,6 +1,6 @@
 package com.example
 
-import com.example.DataCompression.{encode, decode}
+import com.example.DataCompression.encode
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
