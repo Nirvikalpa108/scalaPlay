@@ -29,9 +29,15 @@ object DataCompression {
         chars match {
           case Nil =>
             returnString
-//          case head :: tail :: rest if head.toInt % head.toInt == 1 =>
-//            val count = tail.toString * head
-//            recurseAgain(rest, returnString + count)
+          case head :: tail :: letter :: rest if head.isDigit && tail.isDigit =>
+            val combinedNumber = head.toString + tail.toString
+            val numberWeWant = combinedNumber.toInt
+            val count = letter.toString * numberWeWant
+            recurseAgain(rest, returnString + count)
+          case head :: tail :: rest if head.isDigit =>
+            val number = head.toInt - 48
+            val count = tail.toString * number
+            recurseAgain(rest, returnString + count)
           case head :: tail =>
             recurseAgain(tail, returnString + head)
         }
