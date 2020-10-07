@@ -1,6 +1,6 @@
 package com.example
 
-import com.example.DataCompression.encode
+import com.example.DataCompression.{decode, encode}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -15,39 +15,28 @@ class dataCompressionTest extends AnyFreeSpec with Matchers {
     "encode - string with no single characters" in {
       encode("AABBBCCCC") shouldEqual "2A3B4C"
     }
-
+    "encode - single characters mixed with repeated characters" in {
+      encode("WWWWWWWWWWWWBWWWWWWWWWWWWBBBWWWWWWWWWWWWWWWWWWWWWWWWB") shouldEqual "12WB12W3B24WB"
+    }
+    "encode - multiple whitespace mixed in string" in {
+      encode("  hsqq qww  ") shouldEqual "2 hs2q q2w2 "
+    }
+    "encode - lowercase characters" in {
+      encode("aabbbcccc") shouldEqual "2a3b4c"
+    }
+    "decode - empty string" in {
+      decode("") shouldEqual ""
+    }
+    "decode - single characters only" in {
+      decode("XYZ") shouldEqual "XYZ"
+    }
+    "decode - string with no single characters" in {
+      decode("2A3B4C") shouldEqual "AABBBCCCC"
+    }
   }
+
 //
-//  test("encode - single characters mixed with repeated characters") {
-//    pending
-//    RunLengthEncoding.encode("WWWWWWWWWWWWBWWWWWWWWWWWWBBBWWWWWWWWWWWWWWWWWWWWWWWWB") should be ("12WB12W3B24WB")
-//  }
-//
-//  test("encode - multiple whitespace mixed in string") {
-//    pending
-//    RunLengthEncoding.encode("  hsqq qww  ") should be ("2 hs2q q2w2 ")
-//  }
-//
-//  test("encode - lowercase characters") {
-//    pending
-//    RunLengthEncoding.encode("aabbbcccc") should be ("2a3b4c")
-//  }
-//
-//  test("decode - empty string") {
-//    pending
-//    RunLengthEncoding.decode("") should be ("")
-//  }
-//
-//  test("decode - single characters only") {
-//    pending
-//    RunLengthEncoding.decode("XYZ") should be ("XYZ")
-//  }
-//
-//  test("decode - string with no single characters") {
-//    pending
-//    RunLengthEncoding.decode("2A3B4C") should be ("AABBBCCCC")
-//  }
-//
+
 //  test("decode - single characters with repeated characters") {
 //    pending
 //    RunLengthEncoding.decode("10WB12W3B24WB") should be ("WWWWWWWWWWBWWWWWWWWWWWWBBBWWWWWWWWWWWWWWWWWWWWWWWWB")
