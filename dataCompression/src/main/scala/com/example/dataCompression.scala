@@ -25,24 +25,25 @@ object DataCompression {
 
   def decode(s: String): String = {
     if (s.isEmpty) "" else {
-      def recurseAgain(chars: List[Char], returnString: String): String = {
+      def recurse(chars: List[Char], returnString: String): String = {
         chars match {
           case Nil =>
             returnString
-          case head :: tail :: letter :: rest if head.isDigit && tail.isDigit =>
-            val combinedNumber = head.toString + tail.toString
-            val numberWeWant = combinedNumber.toInt
-            val count = letter.toString * numberWeWant
-            recurseAgain(rest, returnString + count)
-          case head :: tail :: rest if head.isDigit =>
-            val number = head.toInt - 48
-            val count = tail.toString * number
-            recurseAgain(rest, returnString + count)
+          case firstNum :: secondNum :: letter :: tail if firstNum.isDigit && secondNum.isDigit =>
+            val combinedChars = firstNum.toString + secondNum.toString
+            val number = combinedChars.toInt
+            val count = letter.toString * number
+            recurse(tail, returnString + count)
+          case num :: letter :: tail if num.isDigit =>
+            val asciiEncoding = 48
+            val number = num.toInt - asciiEncoding
+            val count = letter.toString * number
+            recurse(tail, returnString + count)
           case head :: tail =>
-            recurseAgain(tail, returnString + head)
+            recurse(tail, returnString + head)
         }
       }
-      recurseAgain(s.toList, "")
+      recurse(s.toList, "")
     }
   }
 }

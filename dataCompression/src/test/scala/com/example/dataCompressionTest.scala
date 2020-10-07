@@ -46,11 +46,5 @@ class dataCompressionTest extends AnyFreeSpec with Matchers {
       decode(encode("zzz ZZ  zZ")) shouldEqual "zzz ZZ  zZ"
     }
   }
-
-
-//  test("consistency - encode followed by decode gives original string") {
-//    pending
-//    RunLengthEncoding.decode(RunLengthEncoding.encode("zzz ZZ  zZ")) should be ("zzz ZZ  zZ")
-//  }
 }
 
