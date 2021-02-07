@@ -3,15 +3,20 @@ package example
 import scala.io.Source
 import scala.util.control.NonFatal
 
+// Good work!
+// Next steps: figure out why the tests are not passing.
+// complete the getDisplayName function with the advice of Will!
+// you're winning!
+
 object Twitter {
   def main(args: Array[String]): Unit = {
     try {
       val input = args.head
       val userId = processUserId(input)
-      val followers = getFollowers(userId)
-      val tweetsFromFollowers = getTweetsFromFollowers(followers)
-      val tweetsFromFollowersWithDisplayName = getDisplayName(tweetsFromFollowers)
-      val tweetsWithParsedTimestamp = parseTimestamp(tweetsFromFollowersWithDisplayName)
+      val follows = getFollows(userId)
+      val tweetsFromFollows = getTweets(follows)
+      val tweetsFromFollowsWithDisplayName = getDisplayName(tweetsFromFollows)
+      val tweetsWithParsedTimestamp = parseTimestamp(tweetsFromFollowsWithDisplayName)
       val mostRecentTweets = getMostRecentTweets(tweetsWithParsedTimestamp)
       val tweetsWithHumanReadableTimestamp = makeTimestampHumanReadable(mostRecentTweets)
       val result = results(tweetsWithHumanReadableTimestamp)
@@ -23,32 +28,28 @@ object Twitter {
   }
 
   // make sure we've got an Int from the CLI input
+  //TODO: check how I want to manage user id being string, but checking it's an int string value?!
+  // what if the input is a long and not an Int??
   def processUserId(userId: String): Int = userId.toInt
-  // who does the user id follow? (follows.csv) get the destinationID
-  def getFollowers(userID: Int): List[Long] = new FollowsRead(followsFile).read().flatMap(_.get(userID))
-  // which tweets are from destinationID? destinationID, should match authorID in (tweets.csv)
-  def getTweetsFromFollowers(destinationIds: List[Long]) = {
+   //who does the user id follow? (follows.csv) get the destinationID
+  def getFollows(userId: Int): List[Follows] = {
+    val follows = FollowsRead.read(followsFile)
+    for {
+      follows <- follows.filter(_.sourceUserId == userId.toString)
+    } yield follows
+  }
+   //which tweets are from destinationID? destinationID, should match authorID in (tweets.csv)
+  def getTweets(destinationIds: List[Follows]): List[RawTweet] = {
     val tweetsFromFollowers = new TweetsRead(tweetsFile).read()
     for {
       destinationId <- destinationIds
-      tweet <- tweetsFromFollowers
-      mapWithDestId <- tweet.filter(_._1 == destinationId)
-    } yield mapWithDestId
+      result <- tweetsFromFollowers.filter(_.authorId == destinationId.toString)
+    } yield result
   }
   // get display name - match author id (tweets csv) to id in (users.csv)
-  def getDisplayName(tweetsWithoutDisplayName: List[(Long, List[String])]): List[(String, List[String])] = {
+  def getDisplayName(tweetsWithoutDisplayName: List[RawTweet]): List[(String, List[String])] = {
     val users = new UsersRead(usersFile).read()
-    for (user <- users) yield {
-      def swapUserIdForDisplayName(list: List[(Long, List[String])]): List[(String, List[String])] = {
-        list match {
-          case s :: rest =>
-            if (s._1.toString == user._1)
-              (user._1, s._2) :: swapUserIdForDisplayName(rest)
-          case _ => swapUserIdForDisplayName(list)
-        }
-      }
-      swapUserIdForDisplayName(tweetsWithoutDisplayName)
-    }
+    ???
   }
   // parse timestamp in tweets.csv
   def parseTimestamp(tweetsWithUnparsedTimestamp: List[(String, List[String])]): List[ParsedTimeStampTweet] = ???
@@ -59,33 +60,35 @@ object Twitter {
   // amalgamate results: display name, timestamp human readable, tweet text
   def results(tweets: List[HumanReadableTweet]): List[String] = ???
 
-  // case class Follows(sourceUserId: Long, destinationUserId: Long)
+  case class Follows(sourceUserId: String, destinationUserId: String)
 
-  case class RawTweet(tweetId: Long, authorId: Long, timestamp: Long, text: String)
+  case class RawTweet(tweetId: String, authorId: String, timestamp: String, text: String)
 
   case class ParsedTimeStampTweet()
 
   case class HumanReadableTweet()
 
-  case class User(userId: Int, twitterScreenName: String, fullDisplayName: String)
+  case class User(userId: String, twitterScreenName: String, fullDisplayName: String)
 
-  class FollowsRead(val fileName: String) {
-    def read(): List[Map[Long, Long]] = {
+  object FollowsRead {
+    def read(fileName: String): List[Follows] = {
       val file = Source.fromFile(fileName)
       for {
-        line <- file.getLines().toList
+        line <- file.getLines.toList
         values = line.split(",")
-      } yield Map(values(0).toLong -> values(1).toLong)
+      } yield {
+        Follows(values(0), values(1))
+      }
     }
   }
 
   class TweetsRead(val fileName: String) {
-    def read(): List[Map[Long, List[String]]] = {
+    def read(): List[RawTweet] = {
       val file = Source.fromFile(fileName)
       for {
         line <- file.getLines().toList
         values = line.split(",")
-      } yield Map(values(1).toLong -> List(values(0), values(2), values(3)))
+      } yield RawTweet(values(0), values(1), values(2), values(3))
     }
   }
 

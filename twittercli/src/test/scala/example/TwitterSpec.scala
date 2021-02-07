@@ -1,12 +1,12 @@
 package example
 
-import example.Twitter.{FollowsRead, RawTweet, TweetsRead, UsersRead, followsFile, getDisplayName, getFollowers, getTweetsFromFollowers, processUserId, tweetsFile, usersFile}
+import example.Twitter.{Follows, FollowsRead, RawTweet, TweetsRead, UsersRead, followsFile, getDisplayName, getFollows, getTweets, processUserId, tweetsFile, usersFile}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
 class TwitterSpec extends AnyFreeSpec with Matchers {
   "transform a user id parameter" - {
-    "into an Int from a String" in {
+    "from a String to an Int" in {
       processUserId("1") shouldEqual 1
     }
     "and throw an exception if unable to transform into an Int" in {
@@ -14,28 +14,31 @@ class TwitterSpec extends AnyFreeSpec with Matchers {
     }
   }
   "get the followers of a user" - {
-    val csv = new FollowsRead(followsFile).read()
-    "load the followers csv file" in {
-      csv.size shouldEqual 130393
-      csv.head shouldEqual Map(989489610 -> 10224712)
-      csv(130392) shouldEqual Map(24257941 -> 4558)
+    val followsCsv = FollowsRead.read(followsFile)
+    "load the followers csv file and check the size is correct" in {
+      followsCsv.size shouldEqual 130393
+    }
+    "get the correct head of the file" in {
+      followsCsv.head shouldEqual Follows("989489610", "10224712")
+    }
+    "retrieve the correct values for line 130392 in the followers csv file" in {
+      followsCsv(130392) shouldEqual Follows("24257941", "4558")
     }
     "get the followers of a user successfully" in {
-      getFollowers(989489610).head shouldEqual 10224712
-      getFollowers(989489610).last shouldEqual 393537534
+      getFollows(989489610) should contain (Follows("989489610", "10224712"))
+      getFollows(989489610) should contain(Follows("989489610", "393537534"))
     }
   }
   "get the tweets of a user's followers" - {
     "load the tweets csv file successfully" in {
       val csv = new TweetsRead(tweetsFile).read()
       csv.size shouldEqual 51594
-      val rawTweet = Map(989489610 -> List("643576332438388737", "1442275529", "@marcua oooo I want to hear/read the story! These are my kind of bugs!"))
+      val rawTweet = RawTweet("643576332438388737","989489610","1442275529","@marcua oooo I want to hear/read the story! These are my kind of bugs!")
       csv.head shouldEqual rawTweet
     }
     "get tweets from followerId 10224712" in {
-      val followerId = 10224712
-      val result = (10224712,List("644844719030337536", "1442577936", "Tech conferences... @ Skills Matter https://t.co/Rexwr0UEOz"))
-      getTweetsFromFollowers(List(followerId)).head shouldEqual result
+      val result = ("10224712",List("644844719030337536", "1442577936", "Tech conferences... @ Skills Matter https://t.co/Rexwr0UEOz"))
+      getTweets(List(Follows("989489610", "10224712"))).head shouldEqual result
     }
   }
   "get the tweet author's display name" - {
@@ -49,7 +52,7 @@ class TwitterSpec extends AnyFreeSpec with Matchers {
 
     }
     "get the display name using the user id" in {
-      val tweetsWithoutDisplayName: List[(Long, List[String])] = List((989489610, List("")))
+      val tweetsWithoutDisplayName: List[RawTweet] = List(RawTweet("643576332438388737", "989489610","1442275529", "@marcua oooo I want to hear/read the story! These are my kind of bugs!"))
       getDisplayName(tweetsWithoutDisplayName) shouldEqual List(("Evan Jones", List("")))
     }
   }
