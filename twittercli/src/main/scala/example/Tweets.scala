@@ -5,7 +5,7 @@ import example.Model.{Follow, RawTweet}
 object Tweets {
   val tweetsFile: String = "src/main/resources/data/tweets.csv"
 
-  //which tweets are from destinationID? destinationID, should match authorID in (tweets.csv)
+  //get tweets of those who are followed
   def getTweets(follows: List[Follow]): List[RawTweet] = {
     val tweetsFromFollowers = CsvParser.tweetsRead(tweetsFile)
     for {
