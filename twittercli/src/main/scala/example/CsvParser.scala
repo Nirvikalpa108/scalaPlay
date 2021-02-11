@@ -1,17 +1,17 @@
 package example
 
-import example.Model.{Follows, RawTweet}
+import example.Model.{Follow, RawTweet, User}
 
 import scala.io.Source
 
 object CsvParser {
-    def followsRead(fileName: String): List[Follows] = {
+    def followsRead(fileName: String): List[Follow] = {
       val file = Source.fromFile(fileName)
       for {
         line <- file.getLines.toList
         values = line.split(",")
       } yield {
-        Follows(values(0), values(1))
+        Follow(values(0), values(1))
       }
     }
 
@@ -23,11 +23,11 @@ object CsvParser {
       } yield RawTweet(values(0), values(1), values(2), values(3))
     }
 
-    def usersRead(filename: String): List[(String, String)] = {
+    def usersRead(filename: String): List[User] = {
       val file = Source.fromFile(filename)
       for {
         line <- file.getLines().toList
         values = line.split(",")
-      } yield (values(0), values(2))
+      } yield User(values(0), values(1), values(2))
     }
 }
